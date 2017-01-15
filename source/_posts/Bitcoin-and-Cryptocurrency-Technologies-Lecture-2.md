@@ -1,0 +1,131 @@
+---
+title: Bitcoin and Cryptocurrency Technologies - Lecture 2
+date: 2016-12-03
+categories: Bitcoin and Cryptocurrency Technologies
+tag: Bitcoin, Cryptocurrency Technologies
+---
+
+### How Bitcoin Achieves Decentralization###
+
+***************************************************
+
+#### Segment 2.1 Centralization vs. Decentralization####
+
+&nbsp;&nbsp;&nbsp;&nbsp;这部分我们主要讨论的是，我们怎样才能获得一个去中心化的（decentralized）货币系统呢？
+
+&nbsp;&nbsp;&nbsp;&nbsp;让我觉得有趣的是，Bitcoin实现去中心化的方法不是纯技术，而是技术和clever incentive engineering的结合，在这个lecture之后你会对它是怎样实现的有一个清楚的认识，并且你会清楚Bitcoin的工作、运转以及安全原理。
+
+&nbsp;&nbsp;&nbsp;&nbsp;事实证明，在数字技术中，中心化与去中心化概念竞争占有很重要的角色。为了理解Bitcoin的去中心化，我们将从一个观点开始——decentralization almost always is not all or nothing。几乎没有一个系统是完全去中心化或中心化的，一个很好的例子是Email。我会说Email从根本上是一个去中心化的系统。它基于一个标准分散协议——SMTP，但实际上受控于集权的网络服务提供商。这也许可以帮助我们理解Bitcoin中的工作原理。
+
+&nbsp;&nbsp;&nbsp;&nbsp;让我们深入了解一些Bitcoin的去中心化的技术方面。我会将它分为至少5个不同的问题：
+
+* Who maintains this ledger of transactions?
+* Who has authority over which transactions are valid?
+* Who creates new bitcoins?
+* Who determines how the rules of the system change?
+* How do bitcoins acquire exchange value?
+
+&nbsp;&nbsp;&nbsp;&nbsp;这些都是Bitcoin protocol关于去中心化方面的成分，前三个问题是我们在这个lecture里将会思考的。接下来说到的比特币去中心化的内容都会围绕这三个问题。还需要强调的是在协议之外还有一些去中心化的方面，包括像Bitcoin exchanges（将Bitcoin转换成其他货币）、wallet software和其他一些服务提供商。因此，尽管底层的协议是去中心化的，在其上的服务也可能会是中心化的。
+
+&nbsp;&nbsp;&nbsp;&nbsp;为了深入理解这一点，让我举出Bitcoin的基于去中心化的三个不同的方面：
+
+Peer-to-peer network (may be the closest thing to purely decentralized):
+&nbsp;&nbsp;&nbsp;&nbsp;open to anyone, low barrier to entry.
+
+Mining:
+&nbsp;&nbsp;&nbsp;&nbsp;open to anyone, but inevitable concentration of power often seen as undesirable
+
+Updates to software:
+&nbsp;&nbsp;&nbsp;&nbsp;core developers trusted by community, have great power.
+
+&nbsp;&nbsp;&nbsp;&nbsp;其中Peer-to-peer network无疑是最接近纯去中心化的方面，虽然它也被网络状况所影响；对于开采bitcoin方面则受到了电脑资源的限制，而对于比特币软件则完全由其开发者所控制。
+
+***********************************************
+
+#### Segment 2.2 Distributed Consensus####
+
+&nbsp;&nbsp;&nbsp;&nbsp;建立一个电子现金系统时，在技术层面，需要解决的主要问题：distributed consensus（分布式共识/一致性）。consensus protocols（共识协议）发展的传统方向是分布式系统中的可靠性问题。
+
+&nbsp;&nbsp;&nbsp;&nbsp;类比ScroogeCoin中解决的double-spending问题，distributed consensus问题意味着当分布式系统中产生一个新的动作时，要么系统中所有的节点都记录一样的结果，要么都不记录，因为系统中某些节点可能会出现错误，当出现错误时，如果错误的节点不保存该动作而其他节点保存，将会出现错误。我们也可以想到，如果我们实现了一个distributed consensus protocol，我们可以用它来建立一个复杂的全局的分布式键-值存储（可以将任何键或名称映射到任意值），然后我们就可以实现很多的应用。像分布式DNS等。最酷的是BitCoin已经解决了这个问题。
+
+&nbsp;&nbsp;&nbsp;&nbsp;distributed consensus的技术目的很简单，假设有常数n个节点或者进程，每个节点都有一些输入值。这时候distributed consensus协议就起作用了。协议需要满足两点。首先，协议是会终止（不会无限循环）的，并且所有正确的节点都要能够根据输入给出一致的值（因为有些节点的判断可能会是错误的甚至是恶意的）。而后，这个一致的值不能是任意的，而应该是至少一个正确节点的输出值。
+
+![Peer-to-peer-network](/images/Peer-to-peer-network.jpg)
+
+&nbsp;&nbsp;&nbsp;&nbsp;让我们在Bitcoin环境下看看它意味着什么。为了理解distributed consensus在Bitcoin中是怎样工作的，首先提醒一下Bitcoin是一个peer-to-peer（对等网络）系统。这就意味着当Alice想要付钱给Bob，她需要将这个交易广播给所有对等网络中的节点。你可以从图中看到这个交易的结构，它和我们在lecture 1中的GoofyCoin中看到的是相似的。一个交易需要有Alice的签名来证明交易的正确性，并且需要有Bob的公钥来表示这是支付给Bob的，结构中也含有一个哈希指针指向该比特币之前的交易信息。她将会将这个数据结构广播给所有的对等节点。但是，此时Bob的电脑并没有在网络中，如果Bob想要知道这个交易发生了（有人向他支付了钱），他也许需要在该对等网络中运行一个节点来监听交易信息。事实上，如果只是要接收这笔钱的话，是不需要监听的。这些钱无论他是否在该网络中运行了一个节点都会是他的。
+
+&nbsp;&nbsp;&nbsp;&nbsp;所以，给定对等系统，节点可能想要达成的共识是什么？因为一个系统中可能会有大量的用户在同一时间广播他们的交易，我们需要达成共识的是，已经发生的交易和交易的顺序。它具体意味这什么呢？在Bitcoin中为了达成共识，在任何给定的时间里，所有的对等网络中的节点都保存了一个已经达成共识了的交易数据块序列，类似于ScroogeCoin中的transaction block chain。（我们可以一个一个交易地达成共识，但那很没有效率，所以我们以区块位单位进行）并且每个节点会有一组它所监听到的未完成交易的集合，对于这些交易尚未产生共识。根据定义，每个节点可能有一组略有不同的版本的未完成交易的集合。因为对等网络不是完美的，可能一些节点听说了一个交易，而另外的节点没有。
+
+![consensus-work](/images/consensus-work.jpg)
+
+&nbsp;&nbsp;&nbsp;&nbsp;根据这个设定，我们有了一串每个人都承认的块序列，每个区块都是一系列交易（灰色部分）。如图，现在我们假设系统中有三个节点。每个节点都提议，每个节点都有一个输入也有它所听到的未完成交易集合，它们一起执行consensus protocols，为了使共识协议得以成功，我们可以选择任易有效的区块加入block chain，哪怕它只是由一个节点提出的，（对于一个正确的交易块，其中的每个交易必须是合法地（有正确的数字签名等等））共识协议仍不会有问题。如果某些交易没有成功进入为一致性协议选出结果的特定区块，它可以等到下一个区块再加入。
+
+&nbsp;&nbsp;&nbsp;&nbsp;所以可能绿色的区块被选择了，现在将它加入已共识的区块链，然后协议继续并路由。所以如果你有一个分布式共识的传统理论，并将其应用于bitcoin，这将某种程度是你可能最后得到的系统。现在这和比特币工作有一些相似，但不是比特币真正的工作方式。原因很简单，这么做因为各种原因是有技术上的硬伤的，很明显的原因是：节点可能会崩溃，一些节点可能就是恶意的，但也有网络不是很完美的原因（它是一个点对点系统，不是所有节点都彼此相连、存在网络错误等等导致的大量延迟，大量延迟的主要原因也在于没有一个全局时间的概念，节点不能简单地通过时间戳达成共识）。
+
+&nbsp;&nbsp;&nbsp;&nbsp;如果你将传统的distributive consensus理论应用于比特币，那么最终就会得到上面的系统。这跟Bitcoin的工作原理有一些共同点，但不是准确的Bitcoin的工作方式，因为由于各种原因（如下），这种方式的技术难度很大。
+
+* Nodes might crash
+* Nodes might outright be malicious（节点是完全恶意的）
+* Network is imperfect:
+&nbsp;&nbsp;&nbsp;&nbsp;Not all pairs of nodes connected
+&nbsp;&nbsp;&nbsp;&nbsp;Faults in network
+&nbsp;&nbsp;&nbsp;&nbsp;Latency: one particular consequense is that there is no notion of global time. It means that not all nodes can agree to a common odering of events simply based on cbserving timestamps.
+
+Some well-known protocols:
+
+* Pxos:
+&nbsp;&nbsp;&nbsp;&nbsp;Never produces inconsistent result, but can(rarely) get stuck.
+
+&nbsp;&nbsp;&nbsp;&nbsp;因此，比特币有哪些事情是不同的呢？首先，它引入了激励的概念（在货币系统环境下适用，但不适合普遍的分布式系统）。其他的不同之处是它确实拥抱了随机的概念。意味着，它从一个有特殊概念的起点开始，最终却达成了一致性，而不是在一个很长的时间段保持一致性，例如现实系统中的一小时。但是，即使在最终，你也不能百分之百保证你感兴趣的交易或区块已经进入了一直的区块链。随着时间发展，你的一致性的可能性越来越高，这种交易出错的假设的可能性成指数下降。这就是比特币能给的固定概率保证，也是它能绕开传统分布式系统不可解问题的原因。
+
+*********************************************************
+
+#### Segment 2.3 Consensus without Identity: the Block Chain####
+
+&nbsp;&nbsp;&nbsp;&nbsp;所以，让我们深入了解比特币共识算法的一些技术细节，同时当我们看到这些，我们需要记住比特币所有的节点是在节点没有任何可持久化的长期身份标识情况下完成所有运作的（值得再次提醒的是，比特币和传统分布式算法的应用环境不同）。如果节点拥有长久的身份标识，事情会简单很多，我们可以通过对身份ID的一些要求简化操作，在安全方面也有更多的可行性。
+
+&nbsp;&nbsp;&nbsp;&nbsp;那么为什么比特币没有身份标识呢？一个原因是如果你在一个点对点系统的去中心化模型中，在其中没有中心化的权威组织可以给予节点身份标识并验证他们不能任意创建新的节点，就容易出现女巫攻击（Sybil attack），女巫仅仅是恶意的对手任意制造的拷贝节点以使其看起来有很多的参与者，实际上，这些伪参与者都是被同一个对手所控制的。另外的原因是，使用假名是比特币的一个固有目标，即使能简单地给所有节点或者参与者创建身份标识，我们也没有必要这么做。所以，比特币没有给你很强的匿名保证，你的不同交易可能会被联系在一起，但是同时，没有人强迫你出示你真实生活的身份标识（像名字、IP之类的）才能参与点对点系统，在区块链中，这是一个重要属性。
+
+&nbsp;&nbsp;&nbsp;&nbsp;所以，在这里我们可以取而代之做一个假设，并且我们需要对这个假设的可行性很有信心。之后我们会知道这个假设实际上是怎样完成的。这个很弱的假设是，我们将假设有这样的能力，无论何种方式，在系统中挑选一个随机节点。我们可以给他们令牌或者票据或者其他这类东西，然后允许我们晚一些挑选一个随机的令牌ID并访问这个人，进一步假设，当前，令牌的生成和分布式算法已经足够聪明，如果对手试图创建很多合规的节点，所有这些节点都仅会得到一个令牌并且对手无法复制这个能力。
+
+&nbsp;&nbsp;&nbsp;&nbsp;现在让我们看看在随机选取节点和某种被称为隐式一致性的假设下，什么会成为可能。那么什么是隐式一致性呢？在每一轮中，都会有随机的节点提出要达成共识的区块，每一轮都对应区块链的不同的区块。现在某一轮中一个节点被神奇地选中了，这个节点将可以提议区块链中的下一个区块，这里没有一致性算法也没有投票，这个节点只是简单地单方面提议了区块链中的下个区块是什么，但是如果那个区块是恶意的呢？有一个这样的过程，其他节点将会接受或拒绝那个区块，如果它们接受了这个区块，它们将从这个区块开始扩展区块链，如果它们拒绝了这个区块，它们将会从上一个区块开始扩展区块链（由区块链的特殊性我们可以得知是从哪开始扩展的）。这就是比特币中整体共识算法看起来是如何工作的，但现在讨论的有些简化，简化的愿意是我们假定了一个可以说是魔术般的随机节点选取过程，但是除了这个简化，已经非常接近比特币的实际工作方式了。
+
+Consensus algorithm（simplified）
+1. New transactions are broadcast to all nodes
+2. Each node collects new transactions into a block
+3. In each round a random node gets to broadcast its block(提出下一个共识区块的建议)
+4. Other nodes accept the block only if all transactions in it are valid (unspent, valid signatures)
+5. Nodes express their acceptance of the block by including its hash in the next block they create
+
+&nbsp;&nbsp;&nbsp;&nbsp;所以，无论何时当爱丽丝向鲍勃付款时，她将创建一个交易，她将向所有节点广播交易，任何一直监听网络的节点都收集着一个还未被加入到区块链的未完成交易列表。在某一时刻，这些节点中一个被随机地选中而可以提议下一个区块，它将所有监听到的未完成交易聚拢，并提议下一个区块，现在被选中的节点可能是诚实的，但它也可能是一个恶意节点，或者一个错误的节点提交了包含了非法交易的区块，非法区块是那些没有正确数字签名 或者有已经被消费的交易，换句话说，试图重复消费。所以如果这发生了，另外一些节点会表明它们对于该区块的接受或者拒绝，通过在下一个区块中包含该区块的哈希值表示接受该区块，或者忽略该区块，而包含该区块前一个它们认为合法的区块的哈希值。
+
+![double-spending-success](double-spending-success.png)
+
+&nbsp;&nbsp;&nbsp;&nbsp;假设爱丽丝是一个恶意节点，由于底层密码是坚固的，爱丽丝不可能简单地偷走其他节点的货币。简单地拒绝为鲍勃服务也没有任何意义（鲍勃只需要等待其交易进入其他节点提出的区块就好），所以我们面临的问题主要是double-spending攻击。假设爱丽丝要向鲍勃购买一款软件。现在爱丽丝合法地支付给了鲍勃货币，鲍勃没有再进行确认，将软件给了爱丽丝，并假设有诚实的节点提出了包含这个交易的区块并加入了区块链（绿色）。但此时，让我们们假设下一个随机节点是爱丽丝控制的恶意节点，爱丽丝将忽略整个合法区块，并提议一个区块，将给鲍勃的货币重复消费给自己控制的节点（红色）。那么我们怎样才能知道这个double-spending攻击成功了还是失败了呢？这取决于最终是绿色还是红色的区块进入了长期性一致链，这是由**诚实节点总是扩展最终最长的合法分支**这个事实决定的。但是，此时正常与重复消费的区块在技术上来说都是合法的，如果之后重复消费的区块先被扩展而成为较长分支，那么它将成为最后的长期性一致链的可能性是很大的，如此的话double-spending攻击就成功了，而合理支付的区块成了孤儿区块。
+
+![double-spending-fail](double-spending-fail.png)
+
+&nbsp;&nbsp;&nbsp;&nbsp;幸好，我们可以换个思路，当鲍勃接受爱丽丝的货币时没有鲁莽地马上认定交易成功，而是继续监听，等待合法分支上更多的区块被确认，这被称为零确认交易。当然此时也有可能发生重复交易攻击，如果重复交易成功了，鲍勃只要意识到合理交易的区块变成了孤儿区块就可以放弃交易从而保护自己。另一种情况，如果重复支付发生了，鲍勃关心的区块被证明被下一个产生的区块所扩展，因为诚实节点总是扩展它们看到的最长的合法的分支，获得越多的确认就有越高的可能性交易最终会进入长期共识链，如果鲍勃能等待更多的确认（在比特币生态系统中最普遍的是等待6个确认），那么重复支付的区块进入长期一致链的可能性就会指数下降，从而保证交易的合法性。大约6个确认之后，你几乎已经不可能弄错了。
+
+***************************************************
+
+#### Segment 2.4 Incentives and Proof of Work####
+
+
+
+
+
+
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;
