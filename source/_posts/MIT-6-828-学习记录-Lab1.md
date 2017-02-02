@@ -301,13 +301,65 @@ tag: OS
 
 &nbsp;&nbsp;&nbsp;&nbsp;在 Lab2 中，我们将映射整个底部256MB的PC的物理地址空间（ from physical addresses 0x00000000 through 0x0fffffff, to virtual addresses 0xf0000000 through 0xffffffff respectively）。你现在应该明白为什么 JOS 只能使用物理内存的低256MB空间了。
 
-&nbsp;&nbsp;&nbsp;&nbsp;现在，我们将映射前4MB的物理内存，这将足以让我们开始运行。我们通过在 kern/entrypgdir.c 中使用手写的、静态初始化的页目录（page directory）和页表（page table）来实现。但现在，你并不需要理解它工作的细节，只需要知道它的作用。
+&nbsp;&nbsp;&nbsp;&nbsp;现在，我们将映射前4MB的物理内存，这将足以让我们开始运行。我们通过在 kern/entrypgdir.c 中使用手写的、静态初始化的页目录（page directory）和页表（page table）来实现。但现在，你并不需要理解它工作的细节，只需要知道它的作用。直到kern / entry.S设置 CR0\_PG 标志，内存引用被视为物理内存地址（严格地说，它们是线性地址，但我们不会改变引导 boot/ boot.S 设置的从线性地址到物理地址的标识映射）。一旦设置了 CR0\_PG 标志内存引用就变成了存储（内存）管理器映射的虚拟内存地址。 entry_pgdir将范围为0xf0000000至0xf0400000的虚拟地址转换为物理地址0x00000000至0x00400000，以及将虚拟地址0x00000000至0x00400000转换为物理地址0x00000000至0x00400000。任何不在这两个范围之一的虚拟地址将导致硬件异常，因为我们还没有设置中断处理，将导致QEMU转储机器状态并退出（或不断地重启，如果不使用 QEMU的6.828修补版本）。
 
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;
+>Exercise 7. Use QEMU and GDB to trace into the JOS kernel and stop at the movl %eax, %cr0. Examine memory at 0x00100000 and at 0xf0100000. Now, single step over that instruction using the stepi GDB command. Again, examine memory at 0x00100000 and at 0xf0100000. Make sure you understand what just happened.
+
+>What is the first instruction after the new mapping is established that would fail to work properly if the mapping weren't in place? Comment out the movl %eax, %cr0 in kern/entry.S, trace into it, and see if you were right.
+
+
+* Formatted Printing to the Console
+
+&nbsp;&nbsp;&nbsp;&nbsp;大多数人觉得 printf() 这样的函数是理所当然的，有时甚至认为它们是C语言的“原语”。但在一个操作系统中，我们必须自己实现所有的 I/O。
+
+&nbsp;&nbsp;&nbsp;&nbsp;浏览 kern/printf.c，lib/printfmt.c 和 kern/console.c 三个文件，并保证你理解了它们之间的关系。在之后的lab中我们会了解到为什么 printfmt.c 位于单独的 lib 目录中。
+
+>Exercise 8. We have omitted a small fragment of code - the code necessary to print octal numbers using patterns of the form "%o". Find and fill in this code fragment.
+
+&nbsp;&nbsp;&nbsp;&nbsp;你需要能够回答以下问题：
+
+1. Explain the interface between printf.c and console.c. Specifically, what function does console.c export? How is this function used by printf.c?
+2. Explain the following from console.c:
+
+		1      if (crt_pos >= CRT_SIZE) {
+		2              int i;
+		3              memmove(crt_buf, crt_buf + CRT_COLS, (CRT_SIZE - CRT_COLS) * sizeof(uint16_t));
+		4              for (i = CRT_SIZE - CRT_COLS; i < CRT_SIZE; i++)
+		5                      crt_buf[i] = 0x0700 | ' ';
+		6              crt_pos -= CRT_COLS;
+		7      }
+
+3. For the following questions you might wish to consult the notes for Lecture 2. These notes cover GCC's calling convention on the x86.
+
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Trace the execution of the following code step-by-step:
+
+		int x = 1, y = 3, z = 4;
+		cprintf("x %d, y %x, z %d\n", x, y, z);
+
+* In the call to cprintf(), to what does fmt point? To what does ap point?
+* List (in order of execution) each call to *cons_putc*, *va_arg*, and *vcprintf*. For *cons_putc*, list its argument as well. For va_arg, list what ap points to before and after the call. For vcprintf list the values of its two arguments.
+
+4. Run the following code.
+
+		unsigned int i = 0x00646c72;
+		cprintf("H%x Wo%s", 57616, &i);
+
+    &nbsp;&nbsp;&nbsp;&nbsp; What is the output? Explain how this output is arrived at in the step-by-step manner of the previous exercise. [Here's an ASCII](http://web.cs.mun.ca/~michael/c/ascii-table.html) table that maps bytes to characters.
+    
+    &nbsp;&nbsp;&nbsp;&nbsp;The output depends on that fact that the x86 is little-endian. If the x86 were instead big-endian what would you set i to in order to yield the same output? Would you need to change 57616 to a different value?
+
+    &nbsp;&nbsp;&nbsp;&nbsp;[Here's a description of little- and big-endian](http://www.webopedia.com/TERM/b/big_endian.html) and [a more whimsical description](http://www.networksorcery.com/enp/ien/ien137.txt).
+
+5. In the following code, what is going to be printed after 'y='? (note: the answer is not a specific value.) Why does this happen?
+
+    	cprintf("x=%d y=%d", 3);
+
+6. Let's say that GCC changed its calling convention so that it pushed arguments on the stack in declaration order, so that the last argument is pushed last. How would you have to change cprintf or its interface so that it would still be possible to pass it a variable number of arguments?
+
+>Challenge Enhance the console to allow text to be printed in different colors. The traditional way to do this is to make it interpret [ANSI escape sequences](http://rrbrandt.dee.ufcg.edu.br/en/docs/ansi/) embedded in the text strings printed to the console, but you may use any mechanism you like. There is plenty of information on [the 6.828 reference page](https://pdos.csail.mit.edu/6.828/2016/reference.html) and elsewhere on the web on programming the VGA display hardware. If you're feeling really adventurous, you could try switching the VGA hardware into a graphics mode and making the console draw text onto the graphical frame buffer.
+
+
+* The Stack
+
 &nbsp;&nbsp;&nbsp;&nbsp;
 &nbsp;&nbsp;&nbsp;&nbsp;
