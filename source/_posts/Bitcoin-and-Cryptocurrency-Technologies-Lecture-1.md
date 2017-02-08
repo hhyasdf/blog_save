@@ -2,7 +2,9 @@
 title: Bitcoin and Cryptocurrency Technologies - Lecture 1
 date: 2016-11-28
 categories: Bitcoin and Cryptocurrency Technologies
-tag: Bitcoin, Cryptocurrency Technologies
+tags: 
+	- Bitcoin
+	- Cryptocurrency Technologies
 ---
 
 ### Introduction to Crypto and Cryptocurrencies###
@@ -29,6 +31,8 @@ Security properties：
     Try to find a "solution" x such that H(id | x) belong to Y. 
 
 Puzzle-friendly property implies that no solving strategy is much better than trying random valuas of x.
+
+<!-- more -->
 
 比特币用到的加密哈希函数叫做：**SHA-256**:
 

@@ -2,7 +2,9 @@
 title: Bitcoin and Cryptocurrency Technologies - Lecture 2
 date: 2016-12-03
 categories: Bitcoin and Cryptocurrency Technologies
-tag: Bitcoin, Cryptocurrency Technologies
+tags: 
+	- Bitcoin
+	- Cryptocurrency Technologies
 ---
 
 ### How Bitcoin Achieves Decentralization###
@@ -24,6 +26,8 @@ tag: Bitcoin, Cryptocurrency Technologies
 * Who creates new bitcoins?
 * Who determines how the rules of the system change?
 * How do bitcoins acquire exchange value?
+
+<!-- more -->
 
 &nbsp;&nbsp;&nbsp;&nbsp;这些都是Bitcoin protocol关于去中心化方面的成分，前三个问题是我们在这个lecture里将会思考的。接下来说到的比特币去中心化的内容都会围绕这三个问题。还需要强调的是在协议之外还有一些去中心化的方面，包括像Bitcoin exchanges（将Bitcoin转换成其他货币）、wallet software和其他一些服务提供商。因此，尽管底层的协议是去中心化的，在其上的服务也可能会是中心化的。
 

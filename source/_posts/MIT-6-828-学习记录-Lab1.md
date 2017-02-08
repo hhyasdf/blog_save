@@ -2,7 +2,8 @@
 title: MIT 6.828 学习记录 Lab1
 date: 2016-11-21
 categories: MIT 6.828 学习记录
-tag: OS
+tags: 
+	- OS
 ---
 
 &nbsp;&nbsp;&nbsp;&nbsp;Lab 1分为三个部分，第一个部分主要讲x86的汇编语言、QEMU（x86虚拟机）和PC的开机启动步骤。第二个部分测试6.828内核的boot loader（在lib的boot目录下）。第三个部分探究6.828内核最初的模板，JOS，在lib的kernel目录下。（默认Linux操作系统）
@@ -13,6 +14,8 @@ tag: OS
 ### Part 1 : PC Bootstrap###
 
 &nbsp;&nbsp;&nbsp;&nbsp;第一个练习的目的是向你介绍x86汇编语言和PC引导过程，然后让你开始学会QEMU和QEMU/GDB调试。在这个lab里你不需要写任何代码，但是无论如何你应该浏览并理解它，准备好回答下面列出的问题。
+
+<!-- more -->
 
 * Getting Started with x86 assembly
 
