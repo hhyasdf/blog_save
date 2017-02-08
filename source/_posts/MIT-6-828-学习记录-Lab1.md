@@ -322,30 +322,30 @@ tags:
 &nbsp;&nbsp;&nbsp;&nbsp;你需要能够回答以下问题：
 
 1. Explain the interface between printf.c and console.c. Specifically, what function does console.c export? How is this function used by printf.c?
-2. Explain the following from console.c:
+2. Explain the following from console.c
 
-		1      if (crt_pos >= CRT_SIZE) {
-		2              int i;
-		3              memmove(crt_buf, crt_buf + CRT_COLS, (CRT_SIZE - CRT_COLS) * sizeof(uint16_t));
-		4              for (i = CRT_SIZE - CRT_COLS; i < CRT_SIZE; i++)
-		5                      crt_buf[i] = 0x0700 | ' ';
-		6              crt_pos -= CRT_COLS;
-		7      }
+> if (crt_pos >= CRT_SIZE) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int i;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;memmove(crt_buf, crt_buf + CRT_COLS, (CRT_SIZE - CRT_COLS) * sizeof(uint16_t));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for (i = CRT_SIZE - CRT_COLS; i < CRT_SIZE; i++)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;crt_buf[i] = 0x0700 | ' ';
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;crt_pos -= CRT_COLS;
+		}
 
 3. For the following questions you might wish to consult the notes for Lecture 2. These notes cover GCC's calling convention on the x86.
 
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Trace the execution of the following code step-by-step:
 
-		int x = 1, y = 3, z = 4;
-		cprintf("x %d, y %x, z %d\n", x, y, z);
+    >int x = 1, y = 3, z = 4;
+	cprintf("x %d, y %x, z %d\n", x, y, z);
 
 * In the call to cprintf(), to what does fmt point? To what does ap point?
 * List (in order of execution) each call to *cons_putc*, *va_arg*, and *vcprintf*. For *cons_putc*, list its argument as well. For va_arg, list what ap points to before and after the call. For vcprintf list the values of its two arguments.
 
 4. Run the following code.
 
-		unsigned int i = 0x00646c72;
-		cprintf("H%x Wo%s", 57616, &i);
+    >unsigned int i = 0x00646c72;
+cprintf("H%x Wo%s", 57616, &i);
 
     &nbsp;&nbsp;&nbsp;&nbsp; What is the output? Explain how this output is arrived at in the step-by-step manner of the previous exercise. [Here's an ASCII](http://web.cs.mun.ca/~michael/c/ascii-table.html) table that maps bytes to characters.
     
@@ -355,7 +355,7 @@ tags:
 
 5. In the following code, what is going to be printed after 'y='? (note: the answer is not a specific value.) Why does this happen?
 
-    	cprintf("x=%d y=%d", 3);
+    >	cprintf("x=%d y=%d", 3);
 
 6. Let's say that GCC changed its calling convention so that it pushed arguments on the stack in declaration order, so that the last argument is pushed last. How would you have to change cprintf or its interface so that it would still be possible to pass it a variable number of arguments?
 
