@@ -41,9 +41,13 @@ $ h_\theta (X) = X\theta $
 
 #### Gradient Descent For Multiple Variables####
 
-对于多特征量的线性回归问题，讲道理和单特征量的线性回归问题是差不多的，只需要加入 $x_0 = 1 $ 递归下降的过程公式就可以写成以下形式：
+对于多特征量的线性回归问题，讲道理和单特征量的线性回归问题是差不多的，只需要加入 $x_0 = 1 $ 递归下降的过程公式就可以写成以下形式（这里注意用向量化计算的思想，用矩阵进行一步计算 $\theta := \theta - \alpha \delta$  (for some vector $\delta \in R^{n+1} $)）：
 
-repeat until convergence: $\qquad \theta_j  :=   \theta_j - \alpha\frac1 m\sum_{i=1}^m(h_\theta(x^i)-y^i)x_j^i ,\quad for \ j = 0 , 1, 2, ... , n $ 
+$repeat until convergence: \lbrace \\\\  \ \ \ \  \theta_0 := \theta_0 - \alpha\frac{1}{m}\sum\limits_{i=1}^{m}(h_\theta(x^i)-y^i)\cdot x_0^i \\\\ \ \ \ \  \theta_1 := \theta_1 - \alpha\frac{1}{m}\sum\limits_{i=1}^{m}(h_\theta(x^i)-y^i)\cdot x_1^i \\\\  \ \ \ \   \theta_2 := \theta_2- \alpha\frac{1}{m}\sum\limits_{i=1}^{m}(h_\theta(x^i)-y^i)\cdot x_2^i \\\\ ... \\\\ \rbrace $
+
+换句话说：
+
+$ repeat until convergence:  \lbrace \\\\ \ \ \ \  \theta_j:=\theta_j-\alpha\frac{1}{m} \sum\limits_{i=1}^{m}(h_\theta(x^i)-y^i) \cdot x_j^i \quad for \quad j:=0,1...n \\\\ \rbrace $
 
 下图将单特征量的情况和多特征量的情况进行了对比：
 
