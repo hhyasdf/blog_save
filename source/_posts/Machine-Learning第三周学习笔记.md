@@ -20,6 +20,8 @@ mathjax: true
 
 $ h_\theta(x) = g(\theta^Tx) \\\\ z=\theta^Tx \\\\ g(z)=\frac{1}{1+e^{-z}}$   
 
+<!-- more -->
+
 sigmoid function的图像如下图：
 
 ![sigmoid-function](/images/machine-learning/sigmoid-function.png)
