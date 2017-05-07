@@ -36,23 +36,23 @@ Certainly the definitive reference for x86 assembly language programming is Inte
 首先需要进行”Sofrware Setup”：编译build一个6.828 boot loader 和 kernel。
 
 	athena% cd lab
-    athena% make
-    + as kern/entry.S
-    + cc kern/entrypgdir.c
-    + cc kern/init.c
-    + cc kern/console.c
-    + cc kern/monitor.c
-    + cc kern/printf.c
-    + cc kern/kdebug.c
-    + cc lib/printfmt.c
-    + cc lib/readline.c
-    + cc lib/string.c
-    + ld obj/kern/kernel
-    + as boot/boot.S
-    + cc -Os boot/main.c
-    + ld boot/boot
-    boot block is 380 bytes (max 510)
-    + mk obj/kern/kernel.img
+	athena% make
+	+ as kern/entry.S
+	+ cc kern/entrypgdir.c
+	+ cc kern/init.c
+	+ cc kern/console.c
+	+ cc kern/monitor.c
+	+ cc kern/printf.c
+	+ cc kern/kdebug.c
+	+ cc lib/printfmt.c
+	+ cc lib/readline.c
+	+ cc lib/string.c
+	+ ld obj/kern/kernel
+	+ as boot/boot.S
+	+ cc -Os boot/main.c
+	+ ld boot/boot
+	boot block is 380 bytes (max 510)
+	+ mk obj/kern/kernel.img
 
 如果你得到像“undefined reference to ‘_\_udivdi3’”的报错，你的系统中可能没有32-bit gcc multilib，你可以尝试安装gcc-multilib包。
 
@@ -108,7 +108,7 @@ help命令的功能很显然，我们主要讨论kerninfo命令的输出的意�
     |     devices      |
     |                  |
     /\/\/\/\/\/\/\/\/\/\
-
+    
     /\/\/\/\/\/\/\/\/\/\
     |                  |
     |      Unused      |
@@ -134,7 +134,7 @@ help命令的功能很显然，我们主要讨论kerninfo命令的输出的意�
 
 首先的电脑，基于16-bit的Intel 8088处理器，只能寻址1MB物理内存。因此早期电脑的物理地址空间从0x00000000开始，在0x000FFFFF而不是0xFFFFFFFF结束。这640KB被叫做“Low Memory”的区域是早期电脑能用的RAM;事实上非常早的电脑只能使用RAM的16KB、32KB或64KB。
 
-从0x000A0000到0xFFFFFFFF的384KB区域被硬件保留作为特殊用途比如说视频播放缓冲区和固定存储器里的固件。保留区域中最重要的部分是the Basic Input/Output System (BIOS)，它占据了从0x000F0000到0x000FFFFF的64KB空间。早期的电脑中BIOS被储存在ROM中，但是现在电脑将BIOS储存在可更新闪存里。BIOS负责执行基本系统的安装比如说激活显卡和检查已安装的内存大小。在执行完基本系统的安装后，BIOS会从合适的位置（软盘、硬盘、CD-ROM或者网络）导入操作系统，然后将机器的控制转移给操作系统。
+从0x000A0000到0x000FFFFF的384KB区域被硬件保留作为特殊用途比如说视频播放缓冲区和固定存储器里的固件。保留区域中最重要的部分是the Basic Input/Output System (BIOS)，它占据了从0x000F0000到0x000FFFFF的64KB空间。早期的电脑中BIOS被储存在ROM中，但是现在电脑将BIOS储存在可更新闪存里。BIOS负责执行基本系统的安装比如说激活显卡和检查已安装的内存大小。在执行完基本系统的安装后，BIOS会从合适的位置（软盘、硬盘、CD-ROM或者网络）导入操作系统，然后将机器的控制转移给操作系统。
 
 在Intel的80286和80386处理器（分别支持16MB和4GB物理内存空间）最终“打破兆字节障碍”后，PC设计者们仍然保留了原始的1MB低字节物理地址空间的原始结构来保证现存软件的向后兼容性。因此，现代PC在物理内存中有一个“洞”（从0x000A0000到0x00100000），将RAM分为”low” or “conventional memory”（the first 640KB）和”extended memory”（everything else）。另外，在PC的32-bit物理地址空间最高处，所有物理RAM之上，现在通常被BIOS保留提供给PCI设备(32位内存映射设备)。
 
@@ -221,7 +221,7 @@ PC的软盘和硬盘被划分为一些大小为512字节的叫做**扇区**的�
 4. 引导加载程序是怎样决定它需要读取多少个扇区才能从磁盘中取得整个内核的？它从哪获得的信息？ 
 
 
-  
+
 * Loading the Kernel
 
 我们现在将会了解引导加载程序里C语言部分的更多细节（boot/main.c），但在这之前我们可以预习一下C语言基础，
@@ -281,13 +281,12 @@ BIOS将引导扇区加载到从地址0x7c00开始的内存中，因此0x7c00就�
 除开段信息，在 ELF 头部中还有个重要的域叫做 e_entry。这个字段保存了程序入口的链接地址：也就是程序正文段（.text）中程序开始执行的内存地址。你可以观察到内核的入口点，通过输入：
 
 	athena% i386-jos-elf-objdump -f obj/kern/kernel
-	
+
 现在你应该可以理解 boot/main.c 中的微型ELF头部了。它将内核的每一个段从磁盘读入内存中段的加载地址然后跳转到内核的入口点执行内核。
 
 >Exercise 6. We can examine memory using GDB's x command. The GDB manual has full details, but for now, it is enough to know that the command x/Nx ADDR prints N words of memory at ADDR. (Note that both 'x's in the command are lowercase.) Warning: The size of a word is not a universal standard. In GNU assembly, a word is two bytes (the 'w' in xorw, which stands for word, means 2 bytes).
 
 >Reset the machine (exit QEMU/GDB and start them again). Examine the 8 words of memory at 0x00100000 at the point the BIOS enters the boot loader, and then again at the point the boot loader enters the kernel. Why are they different? What is there at the second breakpoint? (You do not really need to use QEMU to answer this question. Just think.)
-
 
 *************************************
 ### Part 3 : The Kernel ###
@@ -325,11 +324,11 @@ BIOS将引导扇区加载到从地址0x7c00开始的内存中，因此0x7c00就�
 2. Explain the following from console.c
 
 > if (crt_pos >= CRT_SIZE) {
-int i;
-memmove(crt_buf, crt_buf + CRT_COLS, (CRT_SIZE - CRT_COLS) * sizeof(uint16_t));
-for (i = CRT_SIZE - CRT_COLS; i < CRT_SIZE; i++)
-crt_buf[i] = 0x0700 | ' ';
-crt_pos -= CRT_COLS;
+> int i;
+> memmove(crt_buf, crt_buf + CRT_COLS, (CRT_SIZE - CRT_COLS) * sizeof(uint16_t));
+> for (i = CRT_SIZE - CRT_COLS; i < CRT_SIZE; i++)
+> crt_buf[i] = 0x0700 | ' ';
+> crt_pos -= CRT_COLS;
 		}
 
 3. For the following questions you might wish to consult the notes for Lecture 2. These notes cover GCC's calling convention on the x86.
@@ -337,7 +336,7 @@ crt_pos -= CRT_COLS;
       Trace the execution of the following code step-by-step:
 
     >int x = 1, y = 3, z = 4;
-	cprintf("x %d, y %x, z %d\n", x, y, z);
+    cprintf("x %d, y %x, z %d\n", x, y, z);
 
 * In the call to cprintf(), to what does fmt point? To what does ap point?
 * List (in order of execution) each call to *cons_putc*, *va_arg*, and *vcprintf*. For *cons_putc*, list its argument as well. For va_arg, list what ap points to before and after the call. For vcprintf list the values of its two arguments.
@@ -345,10 +344,10 @@ crt_pos -= CRT_COLS;
 4. Run the following code.
 
     >unsigned int i = 0x00646c72;
-cprintf("H%x Wo%s", 57616, &i);
+    >cprintf("H%x Wo%s", 57616, &i);
 
      What is the output? Explain how this output is arrived at in the step-by-step manner of the previous exercise. [Here's an ASCII](http://web.cs.mun.ca/~michael/c/ascii-table.html) table that maps bytes to characters.
-    
+
     The output depends on that fact that the x86 is little-endian. If the x86 were instead big-endian what would you set i to in order to yield the same output? Would you need to change 57616 to a different value?
 
     [Here's a description of little- and big-endian](http://www.webopedia.com/TERM/b/big_endian.html) and [a more whimsical description](http://www.networksorcery.com/enp/ien/ien137.txt).
