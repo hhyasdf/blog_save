@@ -1,5 +1,5 @@
 ---
- title: Linux-kernel-memory-management
+title: Linux-kernel-memory-management
 date: 2017-12-31
 tags: 
 	- OS 
